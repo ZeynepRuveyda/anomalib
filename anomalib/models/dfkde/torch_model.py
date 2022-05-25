@@ -170,9 +170,7 @@ class DfkdeModel(nn.Module):
         """
 
         densities = self.evaluate(features, as_log_likelihood=True)
-        probabilities = self.to_probability(densities)
-
-        return probabilities
+        return self.to_probability(densities)
 
     def to_probability(self, densities: Tensor) -> Tensor:
         """Converts density scores to anomaly probabilities (see https://www.desmos.com/calculator/ifju7eesg7).

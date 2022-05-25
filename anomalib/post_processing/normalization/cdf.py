@@ -59,8 +59,7 @@ def normalize_torch(targets: Tensor, threshold: Tensor) -> Tensor:
     image_threshold = threshold.cpu()
 
     dist = Normal(torch.Tensor([0]), torch.Tensor([1]))
-    normalized = dist.cdf(targets.cpu() - image_threshold).to(device)
-    return normalized
+    return dist.cdf(targets.cpu() - image_threshold).to(device)
 
 
 def normalize_numpy(targets: np.ndarray, threshold: Union[np.ndarray, float]) -> np.ndarray:

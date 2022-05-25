@@ -36,8 +36,8 @@ from tests.helpers.dataset import get_dataset_path
 def check_tb_logs(model: str):
     """check if TensorBoard logs are generated."""
     for device in ["gpu", "cpu"]:
-        assert (
-            len(list(Path("runs", f"{model}_{device}").glob("events.out.tfevents.*"))) > 0
+        assert list(
+            Path("runs", f"{model}_{device}").glob("events.out.tfevents.*")
         ), f"Benchmarking script didn't generate tensorboard logs for {model}"
 
 

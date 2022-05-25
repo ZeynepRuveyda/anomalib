@@ -31,6 +31,4 @@ def get_sweep_callbacks() -> List[Callback]:
     Returns:
         List[Callback]: List of callbacks
     """
-    callbacks: List[Callback] = [TimerCallback()]
-
-    return callbacks
+    return [TimerCallback()]

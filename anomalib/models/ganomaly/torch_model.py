@@ -361,8 +361,7 @@ class GanomalyModel(nn.Module):
         error_discriminator_fake = self.loss_bce(
             pred_fake, torch.zeros(size=pred_fake.shape, dtype=torch.float32, device=pred_fake.device)
         )
-        loss_discriminator = (error_discriminator_fake + error_discriminator_real) * 0.5
-        return loss_discriminator
+        return (error_discriminator_fake + error_discriminator_real) * 0.5
 
     def get_generator_loss(self, images: Tensor) -> Tensor:
         """Calculates loss for generator.
@@ -383,8 +382,7 @@ class GanomalyModel(nn.Module):
 
         error_adv = self.loss_adv(pred_real, pred_fake)
 
-        loss_generator = error_adv * self.wadv + error_con * self.wcon + error_enc * self.wenc
-        return loss_generator
+        return error_adv * self.wadv + error_con * self.wcon + error_enc * self.wenc
 
     def forward(self, batch: Tensor) -> Tensor:
         """Get scores for batch.

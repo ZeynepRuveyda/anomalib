@@ -54,8 +54,7 @@ def get_version() -> str:
         str: `anomalib` version.
     """
     anomalib = load_module(name="anomalib/__init__.py")
-    version = anomalib.__version__
-    return version
+    return anomalib.__version__
 
 
 def get_required_packages(requirement_files: List[str]) -> List[str]:

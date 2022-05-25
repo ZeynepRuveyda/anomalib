@@ -77,11 +77,7 @@ class MultiVariateGaussian(nn.Module):
             observations = observations.t()
 
         if ddof is None:
-            if bias == 0:
-                ddof = 1
-            else:
-                ddof = 0
-
+            ddof = 1 if bias == 0 else 0
         weights = aweights
         weights_sum: Any
 

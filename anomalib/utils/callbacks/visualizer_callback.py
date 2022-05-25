@@ -83,9 +83,10 @@ class VisualizerCallback(Callback):
                     logger: ImageLoggerBase = cast(ImageLoggerBase, available_loggers[log_to])  # placate mypy
                     logger.add_image(
                         image=visualizer.figure,
-                        name=filename.parent.name + "_" + filename.name,
+                        name=f"{filename.parent.name}_{filename.name}",
                         global_step=module.global_step,
                     )
+
                 else:
                     warn(
                         f"Requested {log_to} logging but logger object is of type: {type(module.logger)}."
@@ -119,11 +120,7 @@ class VisualizerCallback(Callback):
         """
         assert outputs is not None
 
-        if self.inputs_are_normalized:
-            normalize = False  # anomaly maps are already normalized
-        else:
-            normalize = True  # raw anomaly maps. Still need to normalize
-
+        normalize = not self.inputs_are_normalized
         threshold = pl_module.pixel_metrics.threshold
         for i, (filename, image, anomaly_map, pred_score, gt_label) in enumerate(
             zip(

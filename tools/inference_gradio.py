@@ -34,7 +34,7 @@ def infer(
         anomaly_map, anomaly_score, heat_map, pred_mask, vis_img
     """
     # Perform inference for the given image.
-    threshold = threshold / 100
+    threshold /= 100
     anomaly_map, anomaly_score = inferencer.predict(image=image, superimpose=False)
     heat_map = superimpose_anomaly_map(anomaly_map, image)
     pred_mask = compute_mask(anomaly_map, threshold)
@@ -71,9 +71,7 @@ def get_args() -> Namespace:
 
     parser.add_argument("--share", type=bool, required=False, default=False, help="Share Gradio `share_url`")
 
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args()
 
 
 def get_inferencer(config_path: Path, weight_path: Path, meta_data_path: Optional[Path] = None) -> Inferencer:

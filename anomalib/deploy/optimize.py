@@ -36,7 +36,6 @@ def get_model_metadata(model: AnomalyModule) -> Dict[str, Tensor]:
     Returns:
         Dict[str, Tensor]: metadata
     """
-    meta_data = {}
     cached_meta_data = {
         "image_threshold": model.image_threshold.cpu().value,
         "pixel_threshold": model.pixel_threshold.cpu().value,
@@ -47,10 +46,12 @@ def get_model_metadata(model: AnomalyModule) -> Dict[str, Tensor]:
         "min": model.min_max.min.cpu(),
         "max": model.min_max.max.cpu(),
     }
-    # Remove undefined values by copying in a new dict
-    for key, val in cached_meta_data.items():
-        if not np.isinf(val).all():
-            meta_data[key] = val
+    meta_data = {
+        key: val
+        for key, val in cached_meta_data.items()
+        if not np.isinf(val).all()
+    }
+
     del cached_meta_data
     return meta_data
 
@@ -78,7 +79,10 @@ def export_convert(
         input_names=["input"],
         output_names=["output"],
     )
-    optimize_command = "mo --input_model " + str(onnx_path) + " --output_dir " + str(export_path)
+    optimize_command = (
+        f"mo --input_model {str(onnx_path)} --output_dir {str(export_path)}"
+    )
+
     os.system(optimize_command)
     with open(Path(export_path) / "meta_data.json", "w", encoding="utf-8") as metadata_file:
         meta_data = get_model_metadata(model)

@@ -17,8 +17,7 @@ def get_dummy_module(config):
 
 
 def get_dummy_logger(config, tempdir):
-    logger = AnomalibTensorBoardLogger(name=f"tensorboard_logs", save_dir=tempdir)
-    return logger
+    return AnomalibTensorBoardLogger(name="tensorboard_logs", save_dir=tempdir)
 
 
 @pytest.mark.parametrize("dataset", ["segmentation"])

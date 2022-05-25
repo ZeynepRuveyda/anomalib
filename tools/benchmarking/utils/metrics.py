@@ -33,7 +33,7 @@ def write_metrics(model_metrics: Dict[str, Union[str, float]], writers: List[str
         writers (List[str]): List of destinations.
     """
     # Write to file as each run is computed
-    if model_metrics == {} or model_metrics is None:
+    if not model_metrics or model_metrics is None:
         return
 
     # Write to CSV
@@ -71,13 +71,11 @@ def write_to_tensorboard(
         if isinstance(metric, (int, float, bool)):
             scalar_metrics[key.replace(".", "/")] = metric  # need to join by / for tensorboard grouping
             writer.add_scalar(key, metric)
-        else:
-            if key == "model_name":
-                continue
+        elif key != "model_name":
             scalar_prefixes.append(metric)
     scalar_prefix: str = "/".join(scalar_prefixes)
     for key, metric in scalar_metrics.items():
-        writer.add_scalar(scalar_prefix + "/" + str(key), metric)
+        writer.add_scalar(f"{scalar_prefix}/{str(key)}", metric)
     writer.close()
 
 
@@ -109,7 +107,7 @@ def upload_to_wandb(team: str = "anomalib"):
         table = pd.read_csv(csv_file)
         for index, row in table.iterrows():
             row = dict(row[1:])  # remove index column
-            tags = [str(row[column]) for column in tag_list if column in row.keys()]
+            tags = [str(row[column]) for column in tag_list if column in row]
             wandb.init(
                 entity=team, project=project, name=f"{row['model_name']}_{row['dataset.category']}_{index}", tags=tags
             )

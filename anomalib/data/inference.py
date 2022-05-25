@@ -62,6 +62,4 @@ class InferenceDataset(Dataset):
         """Get the image based on the `index`."""
         image_filename = self.image_filenames[index]
         image = read_image(path=image_filename)
-        pre_processed = self.pre_process(image=image)
-
-        return pre_processed
+        return self.pre_process(image=image)

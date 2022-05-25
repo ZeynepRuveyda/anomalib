@@ -42,7 +42,7 @@ class OpenVINOCallback(Callback):
         self.dirpath = dirpath
         self.filename = filename
 
-    def on_train_end(self, trainer, pl_module: AnomalyModule) -> None:  # pylint: disable=W0613
+    def on_train_end(self, trainer, pl_module: AnomalyModule) -> None:    # pylint: disable=W0613
         """Call when the train ends.
 
         Converts the model to ``onnx`` format and then calls OpenVINO's model optimizer to get the
@@ -50,7 +50,7 @@ class OpenVINOCallback(Callback):
         """
         logger.info("Exporting the model to OpenVINO")
         os.makedirs(self.dirpath, exist_ok=True)
-        onnx_path = os.path.join(self.dirpath, self.filename + ".onnx")
+        onnx_path = os.path.join(self.dirpath, f"{self.filename}.onnx")
         export_convert(
             model=pl_module,
             input_size=self.input_size,

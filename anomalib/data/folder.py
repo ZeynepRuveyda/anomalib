@@ -79,7 +79,7 @@ def _prepare_files_labels(
         extensions = (extensions,)
 
     filenames = [f for f in path.glob(r"**/*") if f.suffix in extensions and not f.is_dir()]
-    if len(filenames) == 0:
+    if not filenames:
         raise RuntimeError(f"Found 0 {path_type} images in {path}")
 
     labels = [path_type] * len(filenames)
@@ -236,11 +236,7 @@ class FolderDataset(Dataset):
             )
             self.task = "segmentation"
 
-        if task is None or mask_dir is None:
-            self.task = "classification"
-        else:
-            self.task = task
-
+        self.task = "classification" if task is None or mask_dir is None else task
         self.pre_process = pre_process
         self.samples = make_dataset(
             normal_dir=normal_dir,

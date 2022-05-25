@@ -58,12 +58,11 @@ class Denormalize:
         for tnsr, mean, std in zip(tensor, self.mean, self.std):
             tnsr.mul_(std).add_(mean)
 
-        array = (tensor * 255).permute(1, 2, 0).cpu().numpy().astype(np.uint8)
-        return array
+        return (tensor * 255).permute(1, 2, 0).cpu().numpy().astype(np.uint8)
 
     def __repr__(self):
         """Representational string."""
-        return self.__class__.__name__ + "()"
+        return f"{self.__class__.__name__}()"
 
 
 class ToNumpy:
@@ -95,4 +94,4 @@ class ToNumpy:
 
     def __repr__(self) -> str:
         """Representational string."""
-        return self.__class__.__name__ + "()"
+        return f"{self.__class__.__name__}()"

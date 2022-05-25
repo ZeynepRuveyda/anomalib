@@ -51,7 +51,7 @@ def add_label(
     text = label_name if confidence is None else f"{label_name} ({confidence*100:.0f}%)"
 
     # get font sizing
-    font_scale = min(img_width, img_height) * font_scale
+    font_scale *= min(img_width, img_height)
     thickness = math.ceil(min(img_width, img_height) * thickness_scale)
     (width, height), baseline = cv2.getTextSize(text, font, fontScale=font_scale, thickness=thickness)
 
@@ -128,8 +128,7 @@ def superimpose_anomaly_map(
     """
 
     anomaly_map = anomaly_map_to_color_map(anomaly_map.squeeze(), normalize=normalize)
-    superimposed_map = cv2.addWeighted(anomaly_map, alpha, image, (1 - alpha), gamma)
-    return superimposed_map
+    return cv2.addWeighted(anomaly_map, alpha, image, (1 - alpha), gamma)
 
 
 def compute_mask(anomaly_map: np.ndarray, threshold: float, kernel_size: int = 4) -> np.ndarray:

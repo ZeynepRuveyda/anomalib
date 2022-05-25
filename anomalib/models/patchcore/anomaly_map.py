@@ -66,8 +66,7 @@ class AnomalyMapGenerator:
         max_scores = torch.argmax(patch_scores[:, 0])
         confidence = torch.index_select(patch_scores, 0, max_scores)
         weights = 1 - (torch.max(torch.exp(confidence)) / torch.sum(torch.exp(confidence)))
-        score = weights * torch.max(patch_scores[:, 0])
-        return score
+        return weights * torch.max(patch_scores[:, 0])
 
     def __call__(self, **kwargs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """Returns anomaly_map and anomaly_score.

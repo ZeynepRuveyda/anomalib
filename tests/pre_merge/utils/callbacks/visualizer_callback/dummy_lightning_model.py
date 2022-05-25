@@ -61,14 +61,13 @@ class DummyModule(AnomalyModule):
     def test_step(self, batch, _):
         """Only used to trigger on_test_epoch_end."""
         self.log(name="loss", value=0.0, prog_bar=True)
-        outputs = dict(
+        return dict(
             image_path=[Path("test1.jpg")],
             image=torch.rand((1, 3, 100, 100)),
             mask=torch.zeros((1, 100, 100)),
             anomaly_maps=torch.ones((1, 100, 100)),
             label=torch.Tensor([0]),
         )
-        return outputs
 
     def validation_epoch_end(self, output):
         return None

@@ -88,13 +88,13 @@ def upscale_image(image: Tensor, size: Tuple, mode: str = "padding") -> Tensor:
     image_h, image_w = image.shape[2:]
     resize_h, resize_w = size
 
-    if mode == "padding":
+    if mode == "interpolation":
+        image = F.interpolate(input=image, size=(resize_h, resize_w))
+    elif mode == "padding":
         pad_h = resize_h - image_h
         pad_w = resize_w - image_w
 
         image = F.pad(image, [0, pad_w, 0, pad_h])
-    elif mode == "interpolation":
-        image = F.interpolate(input=image, size=(resize_h, resize_w))
     else:
         raise ValueError(f"Unknown mode {mode}. Only padding and interpolation is available.")
 
@@ -170,8 +170,11 @@ class Tiler:
         if stride is not None:
             self.stride_h, self.stride_w = self.__validate_size_type(stride)
 
-        self.remove_border_count = int(remove_border_count)
-        self.overlapping = not (self.stride_h == self.tile_size_h and self.stride_w == self.tile_size_w)
+        self.remove_border_count = remove_border_count
+        self.overlapping = (
+            self.stride_h != self.tile_size_h or self.stride_w != self.tile_size_w
+        )
+
         self.mode = mode
 
         if self.stride_h > self.tile_size_h or self.stride_w > self.tile_size_w:
@@ -220,7 +223,9 @@ class Tiler:
 
         Returns: Randomly cropped tiles from the image
         """
-        return torch.vstack([T.RandomCrop(self.tile_size_h)(image) for i in range(self.tile_count)])
+        return torch.vstack(
+            [T.RandomCrop(self.tile_size_h)(image) for _ in range(self.tile_count)]
+        )
 
     def __unfold(self, tensor: Tensor) -> Tensor:
         """Unfolds tensor into tiles.
@@ -379,11 +384,7 @@ class Tiler:
 
         image = upscale_image(image, size=(self.resized_h, self.resized_w), mode=self.mode)
 
-        if use_random_tiling:
-            image_tiles = self.__random_tile(image)
-        else:
-            image_tiles = self.__unfold(image)
-        return image_tiles
+        return self.__random_tile(image) if use_random_tiling else self.__unfold(image)
 
     def untile(self, tiles: Tensor) -> Tensor:
         """Untiles patches to reconstruct the original input image.
