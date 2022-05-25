@@ -67,11 +67,11 @@ class TorchInferencer(Inferencer):
             Dict: Dictionary containing the meta_data.
         """
         meta_data: Union[DictConfig, Dict[str, Union[float, Tensor, np.ndarray]]]
-        if path is None:
-            meta_data = get_model_metadata(self.model)
-        else:
-            meta_data = super()._load_meta_data(path)
-        return meta_data
+        return (
+            get_model_metadata(self.model)
+            if path is None
+            else super()._load_meta_data(path)
+        )
 
     def load_model(self, path: Union[str, Path]) -> AnomalyModule:
         """Load the PyTorch model.
@@ -138,15 +138,14 @@ class TorchInferencer(Inferencer):
             anomaly_map = predictions
             pred_score = anomaly_map.reshape(-1).max()
         else:
+            anomaly_map, pred_score = predictions
             # NOTE: Patchcore `forward`` returns heatmap and score.
             #   We need to add the following check to ensure the variables
             #   are properly assigned. Without this check, the code
             #   throws an error regarding type mismatch torch vs np.
             if isinstance(predictions[1], (Tensor)):
-                anomaly_map, pred_score = predictions
                 pred_score = pred_score.detach()
             else:
-                anomaly_map, pred_score = predictions
                 pred_score = pred_score.detach().numpy()
 
         anomaly_map = anomaly_map.squeeze()

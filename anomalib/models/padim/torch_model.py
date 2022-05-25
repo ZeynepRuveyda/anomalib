@@ -58,8 +58,14 @@ class PadimModel(nn.Module):
         # Since idx is randomly selected, save it with model to get same results
         self.register_buffer(
             "idx",
-            torch.tensor(sample(range(0, DIMS[backbone]["orig_dims"]), DIMS[backbone]["reduced_dims"])),
+            torch.tensor(
+                sample(
+                    range(DIMS[backbone]["orig_dims"]),
+                    DIMS[backbone]["reduced_dims"],
+                )
+            ),
         )
+
         self.idx: Tensor
         self.loss = None
         self.anomaly_map_generator = AnomalyMapGenerator(image_size=input_size)
@@ -101,14 +107,15 @@ class PadimModel(nn.Module):
         if self.tiler:
             embeddings = self.tiler.untile(embeddings)
 
-        if self.training:
-            output = embeddings
-        else:
-            output = self.anomaly_map_generator(
-                embedding=embeddings, mean=self.gaussian.mean, inv_covariance=self.gaussian.inv_covariance
+        return (
+            embeddings
+            if self.training
+            else self.anomaly_map_generator(
+                embedding=embeddings,
+                mean=self.gaussian.mean,
+                inv_covariance=self.gaussian.inv_covariance,
             )
-
-        return output
+        )
 
     def generate_embedding(self, features: Dict[str, Tensor]) -> Tensor:
         """Generate embedding from hierarchical feature map.

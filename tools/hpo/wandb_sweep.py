@@ -43,10 +43,10 @@ class WandbSweep:
         self.config = config
         self.sweep_config = sweep_config
         self.observation_budget = sweep_config.observation_budget
-        if "observation_budget" in self.sweep_config.keys():
-            # this instance check is to silence mypy.
-            if isinstance(self.sweep_config, DictConfig):
-                self.sweep_config.pop("observation_budget")
+        if "observation_budget" in self.sweep_config.keys() and isinstance(
+            self.sweep_config, DictConfig
+        ):
+            self.sweep_config.pop("observation_budget")
 
     def run(self):
         """Run the sweep."""

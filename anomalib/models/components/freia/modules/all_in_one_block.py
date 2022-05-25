@@ -134,16 +134,16 @@ class AllInOneBlock(InvertibleModule):
         # global_scale_activation(global_scale) = global_affine_init
         # the 'magic numbers' (specifically for sigmoid) scale the activation to
         # a sensible range.
-        if global_affine_type == "SIGMOID":
+        if global_affine_type == "EXP":
+            global_scale = np.log(global_affine_init)
+            self.global_scale_activation = lambda a: torch.exp(a)
+        elif global_affine_type == "SIGMOID":
             global_scale = 2.0 - np.log(10.0 / global_affine_init - 1.0)
             self.global_scale_activation = lambda a: 10 * torch.sigmoid(a - 2.0)
         elif global_affine_type == "SOFTPLUS":
             global_scale = 2.0 * np.log(np.exp(0.5 * 10.0 * global_affine_init) - 1)
             self.softplus = nn.Softplus(beta=0.5)
             self.global_scale_activation = lambda a: 0.1 * self.softplus(a)
-        elif global_affine_type == "EXP":
-            global_scale = np.log(global_affine_init)
-            self.global_scale_activation = lambda a: torch.exp(a)
         else:
             raise ValueError('Global affine activation must be "SIGMOID", "SOFTPLUS" or "EXP"')
 
@@ -190,7 +190,7 @@ class AllInOneBlock(InvertibleModule):
         for vk in self.vk_householder:
             w = torch.mm(w, torch.eye(self.in_channels).to(w.device) - 2 * torch.ger(vk, vk) / torch.dot(vk, vk))
 
-        for i in range(self.input_rank):
+        for _ in range(self.input_rank):
             w = w.unsqueeze(-1)
         return w
 
@@ -236,10 +236,17 @@ class AllInOneBlock(InvertibleModule):
         if self.GIN:
             sub_jac -= torch.mean(sub_jac, dim=self.sum_dims, keepdim=True)
 
-        if not rev:
-            return (x * torch.exp(sub_jac) + a[:, ch:], torch.sum(sub_jac, dim=self.sum_dims))
-        else:
-            return ((x - a[:, ch:]) * torch.exp(-sub_jac), -torch.sum(sub_jac, dim=self.sum_dims))
+        return (
+            (
+                (x - a[:, ch:]) * torch.exp(-sub_jac),
+                -torch.sum(sub_jac, dim=self.sum_dims),
+            )
+            if rev
+            else (
+                x * torch.exp(sub_jac) + a[:, ch:],
+                torch.sum(sub_jac, dim=self.sum_dims),
+            )
+        )
 
     def forward(self, x, c=[], rev=False, jac=True):
         """See base class docstring."""
@@ -256,11 +263,7 @@ class AllInOneBlock(InvertibleModule):
 
         x1, x2 = torch.split(x[0], self.splits, dim=1)
 
-        if self.conditional:
-            x1c = torch.cat([x1, *c], 1)
-        else:
-            x1c = x1
-
+        x1c = torch.cat([x1, *c], 1) if self.conditional else x1
         if not rev:
             a1 = self.subnet(x1c)
             x2, j2 = self._affine(x2, a1)

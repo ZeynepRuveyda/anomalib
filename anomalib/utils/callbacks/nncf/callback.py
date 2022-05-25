@@ -94,5 +94,8 @@ class NNCFCallback(Callback):
         os.makedirs(self.export_dir, exist_ok=True)
         onnx_path = os.path.join(self.export_dir, "model_nncf.onnx")
         self.nncf_ctrl.export_model(onnx_path)
-        optimize_command = "mo --input_model " + onnx_path + " --output_dir " + self.export_dir
+        optimize_command = (
+            f"mo --input_model {onnx_path} --output_dir {self.export_dir}"
+        )
+
         os.system(optimize_command)

@@ -45,12 +45,11 @@ def get_model(config: Union[DictConfig, ListConfig]) -> AnomalyModule:
     model_list: List[str] = ["cflow", "dfkde", "dfm", "ganomaly", "padim", "patchcore", "stfpm"]
     model: AnomalyModule
 
-    if config.model.name in model_list:
-        module = import_module(f"anomalib.models.{config.model.name}")
-        model = getattr(module, f"{config.model.name.capitalize()}Lightning")(config)
-
-    else:
+    if config.model.name not in model_list:
         raise ValueError(f"Unknown model {config.model.name}!")
+
+    module = import_module(f"anomalib.models.{config.model.name}")
+    model = getattr(module, f"{config.model.name.capitalize()}Lightning")(config)
 
     if "init_weights" in config.keys() and config.init_weights:
         model.load_state_dict(load(os.path.join(config.project.path, config.init_weights))["state_dict"], strict=False)

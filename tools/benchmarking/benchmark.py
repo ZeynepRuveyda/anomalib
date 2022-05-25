@@ -183,23 +183,30 @@ def compute_on_gpu(
 def distribute_over_gpus(sweep_config: Union[DictConfig, ListConfig]):
     """Distribute metric collection over all available GPUs. This is done by splitting the list of configurations."""
     with ProcessPoolExecutor(
-        max_workers=torch.cuda.device_count(), mp_context=multiprocessing.get_context("spawn")
-    ) as executor:
+            max_workers=torch.cuda.device_count(), mp_context=multiprocessing.get_context("spawn")
+        ) as executor:
         run_configs = list(get_run_config(sweep_config.grid_search))
-        jobs = []
-        for device_id, run_split in enumerate(
-            range(0, len(run_configs), math.ceil(len(run_configs) / torch.cuda.device_count()))
-        ):
-            jobs.append(
-                executor.submit(
-                    compute_on_gpu,
-                    run_configs[run_split : run_split + math.ceil(len(run_configs) / torch.cuda.device_count())],
-                    device_id + 1,
-                    sweep_config.seed,
-                    sweep_config.writer,
-                    sweep_config.compute_openvino,
+        jobs = [
+            executor.submit(
+                compute_on_gpu,
+                run_configs[
+                    run_split : run_split
+                    + math.ceil(len(run_configs) / torch.cuda.device_count())
+                ],
+                device_id + 1,
+                sweep_config.seed,
+                sweep_config.writer,
+                sweep_config.compute_openvino,
+            )
+            for device_id, run_split in enumerate(
+                range(
+                    0,
+                    len(run_configs),
+                    math.ceil(len(run_configs) / torch.cuda.device_count()),
                 )
             )
+        ]
+
         for job in jobs:
             try:
                 job.result()

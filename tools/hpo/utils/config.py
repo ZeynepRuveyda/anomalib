@@ -40,7 +40,7 @@ def flatten_hpo_params(params_dict: DictConfig) -> DictConfig:
             keys: List[str]: list of keys leading to the current location in the config.
             flattened_params: DictConfig: Dictionary in which the flattened parameters are stored.
         """
-        if len({"values", "min", "max"}.intersection(nested_params.keys())) > 0:
+        if {"values", "min", "max"}.intersection(nested_params.keys()):
             key = ".".join(keys)
             flattened_params[key] = nested_params
         else:

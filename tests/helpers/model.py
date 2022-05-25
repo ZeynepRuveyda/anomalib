@@ -73,10 +73,10 @@ def setup_model_train(
             config.trainer[legacy_device] = None
 
     # If weight file is empty, remove the key from config
-    if "weight_file" in config.model.keys() and weight_file == "":
+    if "weight_file" in config.model.keys() and not weight_file:
         config.model.pop("weight_file")
     else:
-        config.model.weight_file = weight_file if not fast_run else "weights/last.ckpt"
+        config.model.weight_file = "weights/last.ckpt" if fast_run else weight_file
 
     if nncf:
         config.optimization["nncf"] = {"apply": True, "input_info": {"sample_size": None}}
@@ -92,7 +92,7 @@ def setup_model_train(
     callbacks = get_callbacks(config)
 
     # Force model checkpoint to create checkpoint after first epoch
-    if fast_run == True:
+    if fast_run:
         for index, callback in enumerate(callbacks):
             if isinstance(callback, ModelCheckpoint):
                 callbacks.pop(index)

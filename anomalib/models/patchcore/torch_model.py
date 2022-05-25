@@ -86,15 +86,12 @@ class PatchcoreModel(DynamicBufferModule, nn.Module):
         embedding = self.reshape_embedding(embedding)
 
         if self.training:
-            output = embedding
-        else:
-            patch_scores = self.nearest_neighbors(embedding=embedding, n_neighbors=self.num_neighbors)
-            anomaly_map, anomaly_score = self.anomaly_map_generator(
-                patch_scores=patch_scores, feature_map_shape=feature_map_shape
-            )
-            output = (anomaly_map, anomaly_score)
-
-        return output
+            return embedding
+        patch_scores = self.nearest_neighbors(embedding=embedding, n_neighbors=self.num_neighbors)
+        anomaly_map, anomaly_score = self.anomaly_map_generator(
+            patch_scores=patch_scores, feature_map_shape=feature_map_shape
+        )
+        return anomaly_map, anomaly_score
 
     def generate_embedding(self, features: Dict[str, Tensor]) -> torch.Tensor:
         """Generate embedding from hierarchical feature map.

@@ -140,5 +140,4 @@ class SparseRandomProjection:
         if self.sparse_random_matrix is None:
             raise NotFittedError("`fit()` has not been called on SparseRandomProjection yet.")
 
-        projected_embedding = embedding @ self.sparse_random_matrix.T.float()
-        return projected_embedding
+        return embedding @ self.sparse_random_matrix.T.float()

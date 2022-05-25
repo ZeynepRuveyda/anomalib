@@ -14,8 +14,7 @@ def run_train_test(config):
 
     trainer = Trainer(**config.trainer, callbacks=callbacks)
     trainer.fit(model=model, datamodule=datamodule)
-    results = trainer.test(model=model, datamodule=datamodule)
-    return results
+    return trainer.test(model=model, datamodule=datamodule)
 
 
 @TestDataset(num_train=200, num_test=30, path=get_dataset_path(), seed=42)

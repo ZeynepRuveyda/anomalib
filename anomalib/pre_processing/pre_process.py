@@ -103,7 +103,7 @@ class PreProcessor:
 
         transforms: A.Compose
 
-        if self.config is None and self.image_size is not None:
+        if self.config is None:
             if isinstance(self.image_size, int):
                 height, width = self.image_size, self.image_size
             elif isinstance(self.image_size, tuple):
@@ -127,9 +127,8 @@ class PreProcessor:
             else:
                 raise ValueError("config could be either ``str`` or ``A.Compose``")
 
-        if not self.to_tensor:
-            if isinstance(transforms[-1], ToTensorV2):
-                transforms = A.Compose(transforms[:-1])
+        if not self.to_tensor and isinstance(transforms[-1], ToTensorV2):
+            transforms = A.Compose(transforms[:-1])
 
         return transforms
 

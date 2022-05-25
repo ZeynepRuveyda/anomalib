@@ -85,27 +85,31 @@ def get_callbacks(config: Union[ListConfig, DictConfig]) -> List[Callback]:
         load_model = LoadModelCallback(os.path.join(config.project.path, config.model.weight_file))
         callbacks.append(load_model)
 
-    if "normalization_method" in config.model.keys() and not config.model.normalization_method == "none":
+    if (
+        "normalization_method" in config.model.keys()
+        and config.model.normalization_method != "none"
+    ):
         if config.model.normalization_method == "cdf":
-            if config.model.name in ["padim", "stfpm"]:
-                if "nncf" in config.optimization and config.optimization.nncf.apply:
-                    raise NotImplementedError("CDF Score Normalization is currently not compatible with NNCF.")
-                callbacks.append(CdfNormalizationCallback())
-            else:
+            if config.model.name not in ["padim", "stfpm"]:
                 raise NotImplementedError("Score Normalization is currently supported for PADIM and STFPM only.")
+            if "nncf" in config.optimization and config.optimization.nncf.apply:
+                raise NotImplementedError("CDF Score Normalization is currently not compatible with NNCF.")
+            callbacks.append(CdfNormalizationCallback())
         elif config.model.normalization_method == "min_max":
             callbacks.append(MinMaxNormalizationCallback())
         else:
             raise ValueError(f"Normalization method not recognized: {config.model.normalization_method}")
 
-    if not config.project.log_images_to == []:
+    if config.project.log_images_to != []:
         callbacks.append(
             VisualizerCallback(
                 task=config.dataset.task,
                 log_images_to=config.project.log_images_to,
-                inputs_are_normalized=not config.model.normalization_method == "none",
+                inputs_are_normalized=config.model.normalization_method
+                != "none",
             )
         )
+
 
     if "optimization" in config.keys():
         if "nncf" in config.optimization and config.optimization.nncf.apply:

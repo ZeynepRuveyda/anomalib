@@ -87,14 +87,8 @@ class Inferencer(ABC):
             np.ndarray: Output predictions to be visualized.
         """
         if meta_data is None:
-            if hasattr(self, "meta_data"):
-                meta_data = getattr(self, "meta_data")
-            else:
-                meta_data = {}
-        if isinstance(image, (str, Path)):
-            image_arr: np.ndarray = read_image(image)
-        else:  # image is already a numpy array. Kept for mypy compatibility.
-            image_arr = image
+            meta_data = getattr(self, "meta_data") if hasattr(self, "meta_data") else {}
+        image_arr = read_image(image) if isinstance(image, (str, Path)) else image
         meta_data["image_shape"] = image_arr.shape[:2]
 
         processed_image = self.pre_process(image_arr)
@@ -105,7 +99,7 @@ class Inferencer(ABC):
         if overlay_mask and meta_data is not None:
             image_arr = self._superimpose_segmentation_mask(meta_data, anomaly_map, image_arr)
 
-        if superimpose is True:
+        if superimpose:
             anomaly_map = superimpose_anomaly_map(anomaly_map, image_arr)
 
         return anomaly_map, pred_scores

@@ -89,7 +89,7 @@ class Ganomaly(AnomalyModule):
         self.min_scores = torch.tensor(float("inf"), dtype=torch.float32)  # pylint: disable=not-callable
         self.max_scores = torch.tensor(float("-inf"), dtype=torch.float32)  # pylint: disable=not-callable
 
-    def training_step(self, batch, _, optimizer_idx):  # pylint: disable=arguments-differ
+    def training_step(self, batch, _, optimizer_idx):    # pylint: disable=arguments-differ
         """Training step.
 
         Args:
@@ -107,16 +107,13 @@ class Ganomaly(AnomalyModule):
         if optimizer_idx == 0:
             # forward pass
             loss_discriminator = self.model.get_discriminator_loss(padded_images)
-            loss = {"loss": loss_discriminator}
+            return {"loss": loss_discriminator}
 
-        # Generator
         else:
             # forward pass
             loss_generator = self.model.get_generator_loss(padded_images)
 
-            loss = {"loss": loss_generator}
-
-        return loss
+            return {"loss": loss_generator}
 
     def on_validation_start(self) -> None:
         """Reset min and max values for current validation epoch."""

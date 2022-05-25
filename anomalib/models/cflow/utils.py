@@ -39,8 +39,7 @@ def get_logp(dim_feature_vector: int, p_u: torch.Tensor, logdet_j: torch.Tensor)
         torch.Tensor: Log probability
     """
     ln_sqrt_2pi = -np.log(np.sqrt(2 * np.pi))  # ln(sqrt(2*pi))
-    logp = dim_feature_vector * ln_sqrt_2pi - 0.5 * torch.sum(p_u**2, 1) + logdet_j
-    return logp
+    return dim_feature_vector * ln_sqrt_2pi - 0.5 * torch.sum(p_u**2, 1) + logdet_j
 
 
 def positional_encoding_2d(condition_vector: int, height: int, width: int) -> torch.Tensor:
@@ -61,7 +60,7 @@ def positional_encoding_2d(condition_vector: int, height: int, width: int) -> to
         raise ValueError(f"Cannot use sin/cos positional encoding with odd dimension (got dim={condition_vector})")
     pos_encoding = torch.zeros(condition_vector, height, width)
     # Each dimension use half of condition_vector
-    condition_vector = condition_vector // 2
+    condition_vector //= 2
     div_term = torch.exp(torch.arange(0.0, condition_vector, 2) * -(math.log(1e4) / condition_vector))
     pos_w = torch.arange(0.0, width).unsqueeze(1)
     pos_h = torch.arange(0.0, height).unsqueeze(1)
